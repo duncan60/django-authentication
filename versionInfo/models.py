@@ -30,11 +30,12 @@ class Draft(models.Model):
     def __str__(self):
         return f'{self.platform} - {self.version}'
 
-    def save(self, *args, **kwargs):
-        if self.is_review:
-            review = Review(draft=self)
-            review.save()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if self.is_review:
+    #         print(self)
+    #         review = Review(draft=self)
+    #         review.save()
+    #     super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = '草稿管理'
@@ -43,12 +44,12 @@ class Draft(models.Model):
 
 
 class UpdateInfo(models.Model):
-    platform = models.CharField(max_length=20)
-    version = models.CharField(max_length=10)
-    update_text = models.TextField(max_length=200)
-    force_update = models.BooleanField(default=False)
-    pub_date = models.DateTimeField('date published')
-    is_pub = models.BooleanField(default=False)
+    info = models.OneToOneField(
+        Draft,
+        verbose_name='發布訊息',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL)
     created_date = models.DateTimeField(
         auto_now_add=True,
         blank=True,
@@ -60,7 +61,7 @@ class UpdateInfo(models.Model):
     )
 
     def __str__(self):
-        return self.version
+        return self.info.version
 
     class Meta:
         verbose_name = '版本發佈訊息'
@@ -69,8 +70,14 @@ class UpdateInfo(models.Model):
 class Review(models.Model):
     draft = models.ForeignKey(
         Draft,
-        verbose_name='草稿',
+        verbose_name='審核內容',
         on_delete=models.CASCADE)
+    update_info = models.ForeignKey(
+        UpdateInfo,
+        null=True,
+        blank=True,
+        verbose_name='發佈更新',
+        on_delete=models.SET_NULL)
     REVIEW_STATUS = (
         ('0', 'WAITING'),
         ('1', 'PASS'),
@@ -94,11 +101,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.draft.platform} - {self.draft.version}'
-
-    def save(self, *args, **kwargs):
-        print(self.status)
-        if self.status == '1':
-            pass
 
     class Meta:
         verbose_name = '草稿審核'
