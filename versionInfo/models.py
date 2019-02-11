@@ -26,7 +26,6 @@ class Draft(models.Model):
         verbose_name='更新日期'
     )
     is_review = models.BooleanField(default=False, verbose_name='提交送審')
-  
 
     def __str__(self):
         return f'{self.platform} - {self.version}'
@@ -95,6 +94,11 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.draft.platform} - {self.draft.version}'
+
+    def save(self, *args, **kwargs):
+        print(self.status)
+        if self.status == '1':
+            pass
 
     class Meta:
         verbose_name = '草稿審核'

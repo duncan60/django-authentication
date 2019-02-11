@@ -145,6 +145,11 @@ class ReviewAdmin(admin.ModelAdmin):
             extra_context=extra_context)
 
 
+class UpdateInfoAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+
 admin.site.register(Draft, DraftAdmin)
 admin.site.register(Review, ReviewAdmin)
-admin.site.register(UpdateInfo)
+admin.site.register(UpdateInfo, UpdateInfoAdmin)
