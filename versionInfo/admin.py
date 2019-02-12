@@ -42,9 +42,9 @@ class DraftAdmin(admin.ModelAdmin):
 
     def change_view(self, request, object_id, extra_context=None):
         d = Draft.objects.get(id=object_id)
+        extra_context = extra_context or {}
         if d.is_review:
             self.readonly_fields = [f.name for f in self.model._meta.fields]
-            extra_context = extra_context or {}
             extra_context = {
                 'has_add_permission': False,
                 'has_editable_inline_admin_formsets': False,
@@ -60,20 +60,6 @@ class DraftAdmin(admin.ModelAdmin):
             }
         else:
             self.readonly_fields = []
-            extra_context = extra_context or {}
-            extra_context = {
-                'has_add_permission': True,
-                'has_editable_inline_admin_formsets': True,
-                'has_change_permission': True,
-                'has_add_permission': True,
-                'has_add_permission': True,               
-                'show_save_and_continue': True,
-                'show_save_and_add_another': True,
-                'can_save': True,
-                'save_as': True,
-                'show_save': True,
-                'show_delete': True,
-            }
 
         return super(DraftAdmin, self).change_view(
             request,
@@ -82,19 +68,19 @@ class DraftAdmin(admin.ModelAdmin):
 
 
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['get_version', 'get_platform', 'get_pub_date', 'status']
-    list_filter = ['status']
     show_draft_fields = [
-        'draft', 'get_version', 'get_platform', 
-        'get_update_text', 'get_force_update', 'get_pub_date'
+        'get_version', 'get_platform',
+        'get_pub_date', 'get_update_text', 'get_force_update', 'status'
     ]
+    list_display = show_draft_fields[:2] + [show_draft_fields[-1]]
+    list_filter = [show_draft_fields[-1]]
     actions = [make_review_published]
     fieldsets = [
         ('發布訊息', {
-            'fields': show_draft_fields,
+            'fields': show_draft_fields[:-1],
         }),
         ('審核', {
-            'fields': ['status'],
+            'fields': [show_draft_fields[-1]],
         }),
     ]
 
@@ -124,9 +110,9 @@ class ReviewAdmin(admin.ModelAdmin):
             update_info = UpdateInfo(info=obj.draft)
             update_info.save()
         if obj.status == '2':
-            d = obj.draft
-            d.is_review = False
-            d.save()
+            draft = obj.draft
+            draft.is_review = False
+            draft.save()
         super().save_model(request, obj, form, change)
 
     def get_actions(self, request):
@@ -141,36 +127,21 @@ class ReviewAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, extra_context=None):
         d = Review.objects.get(id=object_id)
         extra_context = extra_context or {}
+        extra_context = {
+            'has_add_permission': False,
+            'has_editable_inline_admin_formsets': False,
+            'has_change_permission': False,       
+            'show_save_and_continue': False,
+            'show_save_and_add_another': False,           
+            'show_delete': False,
+         }
         if d.status == '0':
-            extra_context = {
-                'has_add_permission': False,
-                'has_editable_inline_admin_formsets': False,
-                'has_change_permission': False,
-                'has_add_permission': False,
-                'has_add_permission': False,               
-                'show_save_and_continue': False,
-                'show_save_and_add_another': False,              
-                'show_delete': False,
-            }
-            self.readonly_fields = self.show_draft_fields
+            self.readonly_fields = self.show_draft_fields[:-1]
         else:
-            extra_context = {
-                'has_add_permission': False,
-                'has_editable_inline_admin_formsets': False,
-                'has_change_permission': False,
-                'has_add_permission': False,
-                'has_add_permission': False,            
-                'show_save_and_continue': False,
-                'show_save_and_add_another': False,
-                'can_save': False,
-                'save_as': False,
-                'show_save': False,
-                'show_delete': False,
-            }
-            self.readonly_fields = [
-                'draft', 'get_platform', 'get_version',
-                'get_update_text', 'get_force_update', 'get_pub_date', 'status'
-            ]
+            extra_context['show_save'] = False
+            extra_context['save_as'] = False
+            extra_context['show_save'] = False
+            self.readonly_fields = self.show_draft_fields
 
         return super(ReviewAdmin, self).change_view(
             request,
@@ -179,17 +150,13 @@ class ReviewAdmin(admin.ModelAdmin):
 
 
 class UpdateInfoAdmin(admin.ModelAdmin):
-    list_display = [
+    show_fields = [
         'get_version', 'get_platform', 'get_update_text',
         'get_force_update', 'get_pub_date']
-
-    show_info_fields = [
-        'get_version', 'get_platform',
-        'get_update_text', 'get_force_update', 'get_pub_date'
-    ]
+    list_display = show_fields
     fieldsets = [
         (None, {
-            'fields': show_info_fields,
+            'fields': show_fields,
         })
     ]
     # ordering = ['info__version']
@@ -206,7 +173,7 @@ class UpdateInfoAdmin(admin.ModelAdmin):
 
     def get_force_update(self, obj):
         return obj.info.force_update
- 
+
     def get_pub_date(self, obj):
         return obj.info.pub_date
 
