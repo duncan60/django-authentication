@@ -20,3 +20,7 @@ urlpatterns = [
     path('versionInfo/', include('versionInfo.urls')),
     path('admin/', admin.site.urls),
 ]
+
+admin.site.site_header = "管理系統"
+admin.site.site_title = "管理系統 Portal"
+admin.site.index_title = "歡迎來到 管理系統 Portal"

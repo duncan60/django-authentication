@@ -11,6 +11,7 @@ def make_review_published(modeladmin, request, queryset):
 class DraftAdmin(admin.ModelAdmin):
     list_display = ['version', 'platform', 'pub_date', 'is_review']
     list_filter = ('platform', 'version')
+    date_hierarchy = 'pub_date'
 
     def save_model(self, request, obj, form, change):
         if obj.is_review:
@@ -177,6 +178,7 @@ class UpdateInfoAdmin(admin.ModelAdmin):
     def get_pub_date(self, obj):
         return obj.info.pub_date
 
+    get_force_update.boolean = True
     get_platform.short_description = '裝置平台'
     get_version.short_description = '版本號'
     get_update_text.short_description = '訊息文字'

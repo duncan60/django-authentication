@@ -38,7 +38,7 @@ class Draft(models.Model):
     #     super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = '草稿管理'
+        verbose_name_plural = '草稿管理'
         # permissions = (('權限': '說名'), )
         unique_together = ('platform', 'version')
 
@@ -64,7 +64,7 @@ class UpdateInfo(models.Model):
         return self.info.version
 
     class Meta:
-        verbose_name = '版本發佈訊息'
+        verbose_name_plural = '版本發佈訊息'
 
 
 class Review(models.Model):
@@ -103,4 +103,4 @@ class Review(models.Model):
         return f'{self.draft.platform} - {self.draft.version}'
 
     class Meta:
-        verbose_name = '草稿審核'
+        verbose_name_plural = '草稿審核'
