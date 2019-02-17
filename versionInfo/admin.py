@@ -1,6 +1,8 @@
 from django.contrib import admin
-
+from django.utils.html import format_html
+from django.urls import path
 from .models import Draft, Review, UpdateInfo
+from django.urls import reverse
 
 
 def make_review_published(modeladmin, request, queryset):
@@ -154,7 +156,9 @@ class UpdateInfoAdmin(admin.ModelAdmin):
     show_fields = [
         'get_version', 'get_platform', 'get_update_text',
         'get_force_update', 'get_pub_date']
-    list_display = show_fields
+    list_display = [
+        'get_version', 'get_platform', 'get_update_text',
+        'get_force_update', 'get_pub_date', 'action_copy']
     fieldsets = [
         (None, {
             'fields': show_fields,
@@ -162,6 +166,11 @@ class UpdateInfoAdmin(admin.ModelAdmin):
     ]
     # ordering = ['info__version']
     search_fields = ['info__version']
+
+    # def copy_action(self, obj):
+    #     return format_html(
+    #         '<a class="button" href="{}">Deposit</a>&nbsp;'
+    #     )
 
     def get_platform(self, obj):
         return obj.info.platform
@@ -193,6 +202,18 @@ class UpdateInfoAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            # path('draft/add', self, name='draft-copy',)
+        ]
+        return custom_urls + urls
+    
+    def action_copy(self, obj):
+        return format_html(
+          f'<a class="button" href="">複製</a>',
+        )
 
 
 admin.site.register(Draft, DraftAdmin)

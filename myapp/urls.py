@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .router import router
+
 
 urlpatterns = [
     path('versionInfo/', include('versionInfo.urls')),
     path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
 ]
 
 admin.site.site_header = "管理系統"
